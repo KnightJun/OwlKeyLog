@@ -1,6 +1,5 @@
 #include "OwlKeyHook.h"
 #include <windows.h>
-#include <RobinLog.h>
 #include <QDebug>
 #include <QThread>
 #include <QMetaType>
@@ -15,11 +14,11 @@ bool gMouseDown = false;
 OwlKeyHook::OwlKeyHook(QObject *parent):QObject(parent)
 {
     if(__dPtrSet.isEmpty()){
-        LOG_INFO("First OwlKeyHook object.");
+        qInfo() << ("First OwlKeyHook object.");
         qRegisterMetaType<Qt::Key>("Qt::Key");
         qRegisterMetaType<Qt::MouseButton>("Qt::MouseButton");
     }
-    LOG_INFO("OwlKeyHook init");
+    qInfo() << ("OwlKeyHook init");
     __dPtrSet.insert(this);
     connect(this, &OwlKeyHook::sigKeyHookEnable, this, &OwlKeyHook::__setKeyHookEnable);
     connect(this, &OwlKeyHook::sigMouseHookEnable, this, &OwlKeyHook::__setMouseHookEnable);
@@ -40,14 +39,14 @@ void OwlKeyHook::__setMouseHookEnable(bool enable)
     if(enable && !__MouseHook){
         __MouseHook = (quint64)SetWindowsHookEx(WH_MOUSE_LL, MyMouseCallback, NULL, 0);
         if(!__MouseHook){
-            LOG_ERR("Thread {} set WH_MOUSE_LL hook fail!", QThread::currentThreadId());
+            qCritical() << "Thread " << QThread::currentThreadId() << " set WH_MOUSE_LL hook fail!";
         }else{
-            LOG_INFO("Thread {} set WH_MOUSE_LL hook success", QThread::currentThreadId());
+            qCritical() << "Thread " << QThread::currentThreadId() << " set WH_MOUSE_LL hook success";
         }
     }
     else if(!enable && __MouseHook)
     {
-        LOG_INFO("Unhook WH_KEYBOARD_LL");
+        qInfo() << ("Unhook WH_KEYBOARD_LL");
         UnhookWindowsHookEx((HHOOK)__MouseHook);
         __MouseHook = 0;
     }
@@ -57,25 +56,25 @@ void OwlKeyHook::__setKeyHookEnable(bool enable)
     if(enable && !__KeyboardHook){
         __KeyboardHook = (quint64)SetWindowsHookEx(WH_KEYBOARD_LL, MyKeyBoardCallback, NULL, 0);
         if(!__KeyboardHook){
-            LOG_INFO("Thread {} set WH_KEYBOARD_LL hook fail!", QThread::currentThreadId());
+            qInfo() << "Thread " << QThread::currentThreadId() << " set WH_KEYBOARD_LL hook fail!";
         }else{
-            LOG_INFO("Thread {} set WH_KEYBOARD_LL hook success", QThread::currentThreadId());
+            qInfo() << "Thread " << QThread::currentThreadId() << " set WH_KEYBOARD_LL hook success";
         }
     }
     else if(!enable && __KeyboardHook)
     {
-        LOG_INFO("Unhook WH_KEYBOARD_LL");
+        qInfo() << "Unhook WH_KEYBOARD_LL";
         UnhookWindowsHookEx((HHOOK)__KeyboardHook);
         __KeyboardHook = 0;
     }
 }
 OwlKeyHook::~OwlKeyHook()
 {
-    LOG_INFO("OwlKeyHook uninit");
+    qInfo() << "OwlKeyHook uninit";
     __dPtrSet.remove(this);
     if (__dPtrSet.isEmpty())
     {
-        LOG_INFO("Unhook WindowsHookEx");
+        qInfo() << "Unhook WindowsHookEx";
         if(__MouseHook)UnhookWindowsHookEx((HHOOK)__MouseHook);
         if(__KeyboardHook)UnhookWindowsHookEx((HHOOK)__KeyboardHook);
     }

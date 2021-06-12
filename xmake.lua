@@ -1,12 +1,8 @@
 add_rules("mode.debug", "mode.release")
-add_repositories("my-repo git@github.com:Moon-Ocean/xmake-repo.git")
-add_requires("RobinLog"  , {debug = is_mode("debug")})
-
 add_includedirs("include")
 
 target("OwlKeyLog")
     add_rules("qt.shared")
-    add_packages("RobinLog")
     add_defines("OWLKEYLOG_LIB")
     add_headerfiles("include/*.h")
     add_frameworks("QtWidgets", "QtGui")
